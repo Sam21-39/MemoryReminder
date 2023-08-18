@@ -11,6 +11,7 @@ class BaseScaffold extends StatefulWidget {
   final Widget? bottomNavBar;
   final bool isFABRequired;
   final FloatingActionButton? fab;
+  final List<Widget>? actions;
   const BaseScaffold({
     super.key,
     required this.isAppBarNeeded,
@@ -21,6 +22,7 @@ class BaseScaffold extends StatefulWidget {
     required this.isFABRequired,
     this.bottomNavBar,
     this.fab,
+    this.actions,
   });
 
   @override
@@ -32,6 +34,7 @@ class _BaseScaffoldState extends State<BaseScaffold> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: widget.isAppBarNeeded
             ? AppBar(
                 backgroundColor: Colors.tealAccent,
@@ -46,6 +49,7 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                actions: widget.actions!,
               )
             : null,
         backgroundColor: Colors.white,

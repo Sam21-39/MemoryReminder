@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    homeBloc.fetchMemories();
+    homeBloc.fetchMemories(homeBloc.defaultIndex);
   }
 
   @override
@@ -33,21 +33,105 @@ class _HomeScreenState extends State<HomeScreen> {
       isCenterTitle: true,
       isBottomNavRequired: false,
       isFABRequired: true,
+      actions: [
+        InkWell(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return Dialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        children: [
+                          ListTile(
+                            selected: homeBloc.defaultIndex == 0,
+                            onTap: () {
+                              homeBloc.fetchMemories(0);
+                              homeBloc.defaultIndex = 0;
+                              Navigator.pop(context);
+                              EasyLoading.show();
+                            },
+                            title: Text(
+                              'Created Date',
+                              style: TextStyle(fontSize: 16.sp),
+                            ),
+                          ),
+                          const Divider(),
+                          ListTile(
+                            selected: homeBloc.defaultIndex == 1,
+                            onTap: () {
+                              homeBloc.fetchMemories(1);
+                              homeBloc.defaultIndex = 1;
+                              Navigator.pop(context);
+                              EasyLoading.show();
+                            },
+                            title: Text(
+                              'Event Date',
+                              style: TextStyle(fontSize: 16.sp),
+                            ),
+                          ),
+                          const Divider(),
+                          ListTile(
+                            selected: homeBloc.defaultIndex == 2,
+                            onTap: () {
+                              homeBloc.fetchMemories(2);
+                              homeBloc.defaultIndex = 2;
+                              Navigator.pop(context);
+                              EasyLoading.show();
+                            },
+                            title: Text(
+                              'Tag',
+                              style: TextStyle(fontSize: 16.sp),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+          child: const Icon(Icons.filter_alt_rounded),
+        )
+      ],
       body: RefreshIndicator(
         onRefresh: () async {
-          homeBloc.fetchMemories();
+          homeBloc.fetchMemories(homeBloc.defaultIndex);
         },
-        child: SizedBox(
+        child: Container(
+          padding: EdgeInsets.all(8.sp),
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
-              const TextField(),
+              StreamBuilder<List<Memories>?>(
+                  stream: homeBloc.memoryContorller.stream,
+                  builder: (context, memories) {
+                    return TextField(
+                      enabled: memories.hasData && memories.data!.isNotEmpty,
+                      controller: homeBloc.searchCtrl,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(horizontal: 8.sp),
+                        hintText: 'Search',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.sp),
+                        ),
+                      ),
+                    );
+                  }),
               StreamBuilder<List<Memories>?>(
                   stream: homeBloc.memoryContorller.stream,
                   builder: (context, memories) {
                     if (memories.hasData) {
+                      EasyLoading.dismiss();
                       if (memories.data != null && memories.data == []) {
                         return Center(
                           child: Text(
@@ -58,12 +142,28 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       }
+
+                      final searchList = [];
+                      if (homeBloc.searchCtrl.text.isNotEmpty) {
+                        searchList.addAll(memories.data!
+                            .where((e) => homeBloc.searchCtrl.text
+                                .toLowerCase()
+                                .contains(e.tag!.toLowerCase()))
+                            .toList());
+                      } else {
+                        searchList.clear();
+                      }
+
                       return ListView.builder(
                         shrinkWrap: true,
-                        padding: EdgeInsets.all(16.sp),
-                        itemCount: memories.data?.length,
+                        padding: EdgeInsets.all(8.sp),
+                        itemCount: searchList.isEmpty
+                            ? memories.data!.length
+                            : searchList.length,
                         itemBuilder: (context, index) {
-                          final mem = memories.data!;
+                          final mem =
+                              searchList.isEmpty ? memories.data! : searchList;
+
                           return Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
