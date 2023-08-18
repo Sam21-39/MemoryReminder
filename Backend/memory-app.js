@@ -32,6 +32,7 @@ db.once('open', () => {
   const memorySchema = new mongoose.Schema({
     title: {type: String, required: true},
     content: {type: String, required: true},
+    userEmail: {type: String, required: true},
     eventDate: {type: Date, required: true},
     createdDate: { type: Date, default: Date.now },
     lastSentDate: { type: Date, default: Date.now },
@@ -61,12 +62,12 @@ db.once('open', () => {
   // Add a memory
   app.post('/add', async (req, res) => {
     try {
-      const { title, content, eventDate, tag, image } = req.body;
-      const memory = new Memory({ title, content, eventDate, tag, image });
+      const { title, content, userEmail, eventDate, tag, image } = req.body;
+      const memory = new Memory({ title, content, userEmail, eventDate, tag, image });
       await memory.save();
-      res.status(201).json({ message: 'Memory added successfully' });
+      res.status(201).json({status:'CREATED', message: 'Memory added successfully' });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ status:'ERROR', error: error.message });
     }
   });
 
@@ -74,9 +75,9 @@ db.once('open', () => {
   app.get('/getMemory', async (req, res) => {
     try {
       const memories = await Memory.find();
-      res.status(200).json({"status":'OK', "result": memories});
+      res.status(200).json({status:'OK', result: memories, error:"" });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({status:'ERROR', result: [], error: error.message });
     }
   });
 
