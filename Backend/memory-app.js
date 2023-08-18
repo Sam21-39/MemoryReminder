@@ -67,7 +67,7 @@ db.once('open', () => {
       await memory.save();
       res.status(201).json({status:'CREATED', message: 'Memory added successfully' });
     } catch (error) {
-      res.status(500).json({ status:'ERROR', error: error.message });
+      res.status(500).json({ status:'ERROR', message: error.message });
     }
   });
 
@@ -96,8 +96,8 @@ db.once('open', () => {
         const mailOptions = {
           from: authorizedEmail,
           to: userEmail,
-          subject: 'Daily Memory',
-          text: `Title: ${memoryToSend.title}\nContent: ${memoryToSend.content}`,
+          subject: memoryToSend.title,
+          text: `${memoryToSend.content}`,
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
