@@ -74,7 +74,7 @@ db.once('open', () => {
   // Retrieve all memories
   app.get('/getMemory', async (req, res) => {
     try {
-      const memories = await Memory.find();
+      const memories = await Memory.find().sort({ createdDate: -1 });
       res.status(200).json({status:'OK', result: memories, error:"" });
     } catch (error) {
       res.status(500).json({status:'ERROR', result: [], error: error.message });
