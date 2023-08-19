@@ -60,7 +60,7 @@ db.once('open', () => {
  
 
   // Add a memory
-  app.post('/add', async (req, res) => {
+  app.post('/addMemory', async (req, res) => {
     try {
       const { title, content, userEmail, eventDate, tag, image } = req.body;
       const memory = new Memory({ title, content, userEmail, eventDate, tag, image });
@@ -70,6 +70,28 @@ db.once('open', () => {
       res.status(500).json({ status:'ERROR', message: error.message });
     }
   });
+
+  app.put('/editMemory/:id', async (req, res) => {
+    try {
+      const memoryId = req.params.id;
+      const { title, content, eventDate, tag, image  } = req.body;
+  
+      const updatedMemory = await Memory.findByIdAndUpdate(
+        memoryId,
+        { title, content, eventDate, tag, image },
+        { new: true } // This option returns the updated document
+      );
+  
+      if (!updatedMemory) {
+        return res.status(404).json({status:'ERROR', message: 'Memory not found' });
+      }
+  
+      res.status(200).json({status:'OK', result: updatedMemory});
+    } catch (error) {
+      res.status(500).json({status:'ERROR', message: error.message });
+    }
+  });
+  
 
   // Retrieve all memories
   app.get('/getMemory', async (req, res) => {
