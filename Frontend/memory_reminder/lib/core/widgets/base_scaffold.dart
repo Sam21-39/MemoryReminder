@@ -49,12 +49,13 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                actions: widget.actions!,
+                actions: widget.actions,
               )
             : null,
         backgroundColor: Colors.white,
         body: StreamBuilder<ConnectivityResult>(
             stream: Connectivity().onConnectivityChanged,
+            initialData: ConnectivityResult.wifi,
             builder: (context, conn) {
               if (conn.data == ConnectivityResult.wifi ||
                   conn.data == ConnectivityResult.mobile) {
